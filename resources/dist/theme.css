@@ -11,7 +11,16 @@
     --rio-border: #2a3140;
     --rio-text: #e5e7eb;
     --rio-muted: #9ca3af;
+    --rio-primary: #cba24c;
     --rio-success: #22c55e;
+    --rio-warning: #f59e0b;
+    --rio-danger: #ef4444;
+    --rio-focus-ring: #93c5fd;
+    --rio-sidebar-from: #0f172a;
+    --rio-sidebar-to: #111827;
+    --rio-card-radius: 0.9rem;
+    --rio-shadow-enabled: 1;
+    --rio-accent: var(--rio-primary);
 }
 
 .fi-body {
@@ -78,14 +87,14 @@
 }
 
 .rio-apps-item:hover {
-    background: color-mix(in srgb, var(--rio-accent) 16%, transparent);
-    border-color: color-mix(in srgb, var(--rio-accent) 48%, transparent);
+    background: color-mix(in srgb, var(--rio-primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--rio-primary) 48%, transparent);
     transform: translateY(-1px);
 }
 
 .rio-apps-item-active {
-    border-color: color-mix(in srgb, var(--rio-accent) 58%, transparent);
-    background: color-mix(in srgb, var(--rio-accent) 18%, transparent);
+    border-color: color-mix(in srgb, var(--rio-primary) 58%, transparent);
+    background: color-mix(in srgb, var(--rio-primary) 18%, transparent);
 }
 
 .rio-apps-item-icon-wrap {
@@ -141,8 +150,8 @@
 }
 
 .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
-    background: linear-gradient(90deg, color-mix(in srgb, var(--rio-accent) 26%, transparent), transparent);
-    border: 1px solid color-mix(in srgb, var(--rio-accent) 44%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--rio-primary) 26%, transparent), transparent);
+    border: 1px solid color-mix(in srgb, var(--rio-primary) 44%, transparent);
 }
 
 .fi-header-heading,
@@ -152,22 +161,22 @@
     letter-spacing: -0.015em;
 }
 
-.fi-input-wrp,
-.fi-select-input,
 .fi-ta-ctn,
-.fi-fo-field-wrp,
 .fi-dropdown-panel,
 .fi-modal-window,
-.fi-in-table,
-.fi-section,
-.fi-card,
-.fi-wi,
-.fi-ta {
+.fi-in-table {
     border-radius: var(--rio-card-radius);
     border-color: var(--rio-border) !important;
     background: linear-gradient(180deg, var(--rio-surface), var(--rio-surface-alt));
     color: var(--rio-text);
     box-shadow: 0 calc(18px * var(--rio-shadow-enabled)) calc(40px * var(--rio-shadow-enabled)) rgba(0, 0, 0, 0.38);
+}
+
+.fi-section,
+.fi-card,
+.fi-wi,
+.fi-ta {
+    border-radius: var(--rio-card-radius);
 }
 
 .fi-ta-header-cell,
@@ -179,7 +188,7 @@
 
 .fi-ta-row:hover,
 .fi-dropdown-list-item:hover {
-    background: color-mix(in srgb, var(--rio-accent) 12%, transparent);
+    background: color-mix(in srgb, var(--rio-primary) 12%, transparent);
 }
 
 .fi-btn,
@@ -193,9 +202,9 @@
 .fi-link.fi-color-primary,
 .fi-tabs-item.fi-active,
 .fi-pagination-item.fi-active {
-    --c-400: var(--rio-accent);
-    --c-500: var(--rio-accent);
-    --c-600: color-mix(in srgb, var(--rio-accent) 84%, black);
+    --c-400: var(--rio-primary);
+    --c-500: var(--rio-primary);
+    --c-600: color-mix(in srgb, var(--rio-primary) 84%, black);
 }
 
 .fi-badge {
@@ -207,11 +216,7 @@
     color: var(--rio-success) !important;
 }
 
-.fi-placeholder,
-.fi-ta-empty-state-description,
-.fi-helper-text,
-.fi-fo-field-wrp-label,
-.fi-input::placeholder {
+.fi-ta-empty-state-description {
     color: var(--rio-muted) !important;
 }
 
@@ -306,14 +311,9 @@ html:not(.dark) .rio-apps-item-label {
     color: #0f172a;
 }
 
-html:not(.dark) .fi-section,
-html:not(.dark) .fi-card,
-html:not(.dark) .fi-wi,
-html:not(.dark) .fi-ta,
 html:not(.dark) .fi-dropdown-panel,
 html:not(.dark) .fi-modal-window,
 html:not(.dark) .fi-in-table,
-html:not(.dark) .fi-fo-field-wrp,
 html:not(.dark) .fi-ta-ctn,
 html:not(.dark) .fi-ta-main,
 html:not(.dark) .fi-ta-content-ctn,
@@ -366,39 +366,8 @@ html:not(.dark) .fi-ta-header-description,
 html:not(.dark) .fi-ta-group-description,
 html:not(.dark) .fi-ta-empty-state-description,
 html:not(.dark) .fi-ta-cell-label,
-html:not(.dark) .fi-ta-cell-content,
-html:not(.dark) .fi-placeholder,
-html:not(.dark) .fi-helper-text {
+html:not(.dark) .fi-ta-cell-content {
     color: #64748b !important;
-}
-
-html:not(.dark) .fi-input-wrp,
-html:not(.dark) .fi-select-input,
-html:not(.dark) .fi-input,
-html:not(.dark) .fi-global-search .fi-input-wrp,
-html:not(.dark) .fi-ta-search-field .fi-input-wrp,
-html:not(.dark) .fi-pagination-records-per-page-select .fi-input-wrp,
-html:not(.dark) .fi-pagination-records-per-page-select .fi-select-input {
-    background: #ffffff !important;
-    border-color: #cfd6e2 !important;
-    color: #111827 !important;
-    box-shadow: none !important;
-}
-
-html:not(.dark) .fi-input-wrp-prefix,
-html:not(.dark) .fi-input-wrp-suffix,
-html:not(.dark) .fi-input-wrp-label {
-    color: #6b7280 !important;
-}
-
-html:not(.dark) .fi-input::placeholder,
-html:not(.dark) .fi-select-input::placeholder {
-    color: #9ca3af !important;
-}
-
-html:not(.dark) .fi-input-wrp:focus-within {
-    border-color: #93c5fd !important;
-    box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.25) !important;
 }
 
 html:not(.dark) .fi-btn-color-primary,

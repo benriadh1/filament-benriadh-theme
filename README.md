@@ -1,171 +1,154 @@
-# Filament Benriadh Theme
+﻿# Filament Benriadh Theme
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/benriadh1/filament-benriadh-theme.svg?style=flat-square)](https://packagist.org/packages/benriadh1/filament-benriadh-theme)
 [![Total Downloads](https://img.shields.io/packagist/dt/benriadh1/filament-benriadh-theme.svg?style=flat-square)](https://packagist.org/packages/benriadh1/filament-benriadh-theme)
 
+A reusable Filament v5 theme package built with a token-first architecture, preset system, accessibility guardrails, and extension hooks for long-term upgrade safety.
 
-A modern and customizable theme package for Filament, designed to enhance the visual experience of your admin panels with clean styling, flexible configuration, and seamless integration.
+## Highlights
 
-Designed for teams who want more than the default look, this package delivers a polished UI layer with runtime customization, flexible layout options, and seamless integration into any Filament project.
-
-***
-
-## ✨ Features
-
-- 🎨 **ERP-inspired design system** for a clean, professional admin experience  
-- 🌗 **Dark & light mode support** 
-- 🧭 **Flexible navigation layouts**  
-  - Optional hidden sidebar  
-  - Topbar apps dropdown  
-- 💾 **Persistent customization** (stored in database):
-  - `accent_color`
-  - `show_left_sidebar`
-  - `compact_sidebar`
-- 🪶 **Lightweight & developer-friendly** — no heavy overrides, clean integration  
-- 📦 **Publishable assets, config, and migrations**
-
-***
+- Token-first design with semantic tokens (`surface`, `text`, `primary`, `danger`, etc.)
+- Preset system (`corporate`, `minimal`, `bold`, `neutral`) + import/export commands
+- Light / Dark / Auto mode handling
+- Zero-config installer command for fast setup
+- Panel-level overrides and optional tenant-level branding resolver
+- Theme Settings page with multilingual support
+- Plugin compatibility adapter layer
+- Accessibility guardrails (focus ring, reduced motion, WCAG contrast audit command)
+- Upgrade-safe schema (`schema_version`) + migration command for legacy config
 
 ## Requirements
 
-| Requirement | Version |
-|---|---|
-| PHP | `^8.2` |
-| Laravel | `^11.0 || ^12.0` |
-| Filament | `^5.0` |
+- PHP `^8.2`
+- Laravel `^11.0 || ^12.0`
+- Filament `^5.0`
 
-***
-
-## Installation
-
-### 1. Install via Composer
+## Zero-Config Install
 
 ```bash
 composer require benriadh1/filament-benriadh-theme
+php artisan filament-benriadh-theme:install --migrate
 ```
 
-### 2. Publish config, assets, and migrations
+Manual install remains available:
 
 ```bash
 php artisan vendor:publish --tag="filament-benriadh-theme-config"
 php artisan vendor:publish --tag="filament-benriadh-theme-assets"
+php artisan vendor:publish --tag="filament-benriadh-theme-lang"
 php artisan vendor:publish --tag="filament-benriadh-theme-migrations"
-```
-
-### 3. Run migrations
-
-```bash
 php artisan migrate
 ```
 
-### 4. Register plugin in your panel
+## Register In Panel
 
 ```php
 use Benriadh1\FilamentBenriadhTheme\FilamentBenriadhThemePlugin;
 
 public function panel(Panel $panel): Panel
 {
-    return $panel
-        // ... your panel setup
-        ->plugins([
-            FilamentBenriadhThemePlugin::make(),
-        ]);
+    return $panel->plugins([
+        FilamentBenriadhThemePlugin::make(),
+    ]);
 }
 ```
 
-***
-
-## Fluent Plugin API
+## Fluent API
 
 ```php
 FilamentBenriadhThemePlugin::make()
+    ->preset('corporate')
+    ->mode('auto')
     ->accentColor('#cba24c')
     ->sidebarGradient('#0f172a', '#111827')
-    ->showLeftSidebar(true)     // or ->hideLeftSidebar()
+    ->showLeftSidebar(true)
     ->compactSidebar(false)
     ->cardRadius('0.9rem')
-    ->softShadows(true);
+    ->softShadows(true)
+    ->tokens([
+        'primary' => '#2563eb',
+    ])
+    ->layout([
+        'compact_sidebar' => true,
+    ]);
 ```
 
-***
+## Config Model
+
+Main config file: `config/filament-benriadh-theme.php`
+
+Core keys:
+
+- `schema_version`
+- `asset_path`
+- `mode`
+- `preset`
+- `presets`
+- `tokens`
+- `layout`
+- `panel_overrides`
+- `tenant`
+- `extensions`
+- `a11y`
+- `show_theme_settings_page`
+
+Legacy keys are still supported and mapped into v1 schema for backward compatibility.
+
+## Panel + Tenancy Support
+
+- Use `panel_overrides` to provide per-panel visual behavior.
+- Use `tenant.enabled` + `tenant.resolver` to inject tenant branding at runtime.
+- Tenant resolver contract:
+  - `Benriadh1\FilamentBenriadhTheme\Contracts\TenantThemeResolver`
+
+## Extension API
+
+Implement these contracts to extend without forking:
+
+- `Benriadh1\FilamentBenriadhTheme\Contracts\ThemeTokenTransformer`
+- `Benriadh1\FilamentBenriadhTheme\Contracts\PluginThemeAdapter`
+- `Benriadh1\FilamentBenriadhTheme\Contracts\TenantThemeResolver`
+
+## Commands
+
+```bash
+php artisan filament-benriadh-theme:install --migrate
+php artisan filament-benriadh-theme:migrate-schema
+php artisan filament-benriadh-theme:preset-export corporate
+php artisan filament-benriadh-theme:preset-import ./preset.json my_custom --overwrite
+php artisan filament-benriadh-theme:a11y-check --panel=admin
+```
 
 ## Theme Settings Page
 
-When enabled, the package automatically registers a panel page:
+When enabled, the package registers:
 
 - Navigation: `Settings > Theme Settings`
-- Route (admin panel default): `/admin/theme-settings`
+- Route (default admin panel): `/admin/theme-settings`
 
-The page stores values in `filament_theme_settings` and the theme uses them at runtime.
+Values are stored in `filament_theme_settings` and merged with config + runtime overrides.
 
-***
+## Roadmap
 
-## Configuration Reference
+### v1 (current)
 
-Publish config if needed:
+- Token-first config schema
+- Presets + mode handling
+- Panel/tenant/extensibility hooks
+- Install/migrate/preset/a11y command set
+- Multilingual Theme Settings page
 
-```bash
-php artisan vendor:publish --tag="filament-benriadh-theme-config"
-```
+### v2
 
-| Key | Default | Description |
-|---|---|---|
-| `asset_path` | `vendor/filament-benriadh-theme/theme.css` | Published CSS asset path |
-| `accent_color` | `#cba24c` | Default accent color |
-| `sidebar_from` | `#0f172a` | Sidebar gradient start |
-| `sidebar_to` | `#111827` | Sidebar gradient end |
-| `show_left_sidebar` | `true` | Show the left sidebar |
-| `compact_sidebar` | `false` | Use compact sidebar spacing |
-| `card_radius` | `0.9rem` | Global card corner radius |
-| `soft_shadows` | `true` | Enable soft panel shadows |
-| `show_theme_settings_page` | `true` | Show/hide the in-panel Theme Settings page |
+- Broader component parity coverage for complex Filament states
+- Additional first-party plugin adapters
+- Design token validation tooling with stricter schema checks
 
-***
+### v3
 
-## Example Config
-
-```php
-return [
-    'asset_path' => 'vendor/filament-benriadh-theme/theme.css',
-
-    'accent_color' => '#cba24c',
-    'sidebar_from' => '#0f172a',
-    'sidebar_to' => '#111827',
-
-    'show_left_sidebar' => true,
-    'compact_sidebar' => false,
-    'card_radius' => '0.9rem',
-    'soft_shadows' => true,
-
-    'show_theme_settings_page' => true,
-];
-```
-
-***
-
-## Upgrade / Republish
-
-```bash
-php artisan vendor:publish --tag="filament-benriadh-theme-assets" --force
-php artisan vendor:publish --tag="filament-benriadh-theme-config" --force
-php artisan vendor:publish --tag="filament-benriadh-theme-migrations" --force
-php artisan migrate
-php artisan optimize:clear
-```
-
-***
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
-
-***
-
-## Contributing
-
-Contributions and design improvements are welcome via PRs.
-
-***
+- Visual regression suite (light/dark, desktop/mobile)
+- Interactive playground UI for live token editing + export
+- Expanded docs with adapter and tenancy recipes
 
 ## License
 

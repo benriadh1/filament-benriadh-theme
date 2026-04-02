@@ -34,7 +34,7 @@
                     color="gray"
                     icon="heroicon-o-squares-2x2"
                     icon-size="lg"
-                    :label="'Apps menu'"
+                    :label="trans('filament-benriadh-theme::messages.apps_menu')"
                     class="rio-apps-trigger"
                 />
             </x-slot>

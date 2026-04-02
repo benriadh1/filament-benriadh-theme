@@ -5,24 +5,22 @@ namespace Benriadh1\FilamentBenriadhTheme;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
-use Benriadh1\FilamentBenriadhTheme\Models\ThemeSetting;
 use Benriadh1\FilamentBenriadhTheme\Pages\ThemeSettingsPage;
+use Benriadh1\FilamentBenriadhTheme\Support\ThemeConfigResolver;
 
 class FilamentBenriadhThemePlugin implements Plugin
 {
+    protected ?string $presetName = null;
+
+    protected ?string $mode = null;
+
+    /** @var array<string, string> */
+    protected array $tokens = [];
+
+    /** @var array<string, mixed> */
+    protected array $layout = [];
+
     protected ?string $accentColor = null;
-
-    protected ?string $sidebarFrom = null;
-
-    protected ?string $sidebarTo = null;
-
-    protected ?bool $compactSidebar = null;
-
-    protected ?bool $showLeftSidebar = null;
-
-    protected ?string $cardRadius = null;
-
-    protected ?bool $softShadows = null;
 
     public static function make(): static
     {
@@ -45,14 +43,14 @@ class FilamentBenriadhThemePlugin implements Plugin
         $panel->renderHook(
             PanelsRenderHook::TOPBAR_START,
             fn (): string => view('filament-benriadh-theme::hooks.sidebar-dropdown', [
-                'theme' => $this->resolveThemeConfig(),
+                'theme' => $this->resolveThemeConfig($panel),
             ])->render(),
         );
 
         $panel->renderHook(
             PanelsRenderHook::HEAD_END,
             fn (): string => view('filament-benriadh-theme::hooks.head', [
-                'theme' => $this->resolveThemeConfig(),
+                'theme' => $this->resolveThemeConfig($panel),
             ])->render(),
         );
     }
@@ -65,87 +63,119 @@ class FilamentBenriadhThemePlugin implements Plugin
     public function accentColor(string $color): static
     {
         $this->accentColor = $color;
+        $this->tokens['primary'] = $color;
+
+        return $this;
+    }
+
+    public function preset(string $name): static
+    {
+        $this->presetName = $name;
+
+        return $this;
+    }
+
+    public function mode(string $mode): static
+    {
+        $this->mode = $mode;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<string, string>  $tokens
+     */
+    public function tokens(array $tokens): static
+    {
+        $this->tokens = array_replace($this->tokens, $tokens);
+
+        return $this;
+    }
+
+    /**
+     * @param  array<string, mixed>  $layout
+     */
+    public function layout(array $layout): static
+    {
+        $this->layout = array_replace($this->layout, $layout);
 
         return $this;
     }
 
     public function sidebarGradient(string $from, string $to): static
     {
-        $this->sidebarFrom = $from;
-        $this->sidebarTo = $to;
+        $this->tokens['sidebar_from'] = $from;
+        $this->tokens['sidebar_to'] = $to;
 
         return $this;
     }
 
     public function compactSidebar(bool $enabled = true): static
     {
-        $this->compactSidebar = $enabled;
+        $this->layout['compact_sidebar'] = $enabled;
 
         return $this;
     }
 
     public function showLeftSidebar(bool $enabled = true): static
     {
-        $this->showLeftSidebar = $enabled;
+        $this->layout['show_left_sidebar'] = $enabled;
 
         return $this;
     }
 
     public function hideLeftSidebar(): static
     {
-        $this->showLeftSidebar = false;
+        $this->layout['show_left_sidebar'] = false;
 
         return $this;
     }
 
     public function cardRadius(string $radius): static
     {
-        $this->cardRadius = $radius;
+        $this->layout['card_radius'] = $radius;
 
         return $this;
     }
 
     public function softShadows(bool $enabled = true): static
     {
-        $this->softShadows = $enabled;
+        $this->layout['soft_shadows'] = $enabled;
 
         return $this;
     }
 
-    protected function resolveThemeConfig(): array
+    protected function resolveThemeConfig(Panel $panel): array
     {
-        $config = config('filament-benriadh-theme', config('filament-aureus-theme', []));
+        /** @var ThemeConfigResolver $resolver */
+        $resolver = app(ThemeConfigResolver::class);
 
-        $resolved = [
-            'asset_path' => $config['asset_path'] ?? 'vendor/filament-benriadh-theme/theme.css',
-            'accent_color' => $config['accent_color'] ?? '#cba24c',
-            'sidebar_from' => $config['sidebar_from'] ?? '#0f172a',
-            'sidebar_to' => $config['sidebar_to'] ?? '#111827',
-            'show_left_sidebar' => (bool) ($config['show_left_sidebar'] ?? true),
-            'compact_sidebar' => (bool) ($config['compact_sidebar'] ?? false),
-            'card_radius' => $config['card_radius'] ?? '0.9rem',
-            'soft_shadows' => (bool) ($config['soft_shadows'] ?? true),
+        return $resolver->resolve($panel, $this->runtimeOverrides());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function runtimeOverrides(): array
+    {
+        $overrides = [
+            'tokens' => $this->tokens,
+            'layout' => $this->layout,
         ];
 
-        if (ThemeSetting::hasTable()) {
-            $setting = ThemeSetting::query()->first();
-
-            if ($setting) {
-                $resolved['accent_color'] = $setting->accent_color ?: $resolved['accent_color'];
-                $resolved['show_left_sidebar'] = (bool) $setting->show_left_sidebar;
-                $resolved['compact_sidebar'] = (bool) $setting->compact_sidebar;
-            }
+        if ($this->presetName !== null) {
+            $overrides['preset'] = $this->presetName;
         }
 
-        $resolved['accent_color'] = $this->accentColor ?? $resolved['accent_color'];
-        $resolved['sidebar_from'] = $this->sidebarFrom ?? $resolved['sidebar_from'];
-        $resolved['sidebar_to'] = $this->sidebarTo ?? $resolved['sidebar_to'];
-        $resolved['show_left_sidebar'] = $this->showLeftSidebar ?? $resolved['show_left_sidebar'];
-        $resolved['compact_sidebar'] = $this->compactSidebar ?? $resolved['compact_sidebar'];
-        $resolved['card_radius'] = $this->cardRadius ?? $resolved['card_radius'];
-        $resolved['soft_shadows'] = $this->softShadows ?? $resolved['soft_shadows'];
+        if ($this->mode !== null) {
+            $overrides['mode'] = $this->mode;
+        }
 
-        return $resolved;
+        if ($this->accentColor !== null) {
+            $overrides['accent_color'] = $this->accentColor;
+        }
+
+        return $overrides;
     }
 
     protected function shouldRegisterThemeSettingsPage(): bool

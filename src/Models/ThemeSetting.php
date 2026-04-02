@@ -12,6 +12,9 @@ class ThemeSetting extends Model
 
     protected $fillable = [
         'accent_color',
+        'theme_mode',
+        'preset',
+        'tokens',
         'show_left_sidebar',
         'compact_sidebar',
     ];
@@ -19,6 +22,7 @@ class ThemeSetting extends Model
     protected function casts(): array
     {
         return [
+            'tokens' => 'array',
             'show_left_sidebar' => 'boolean',
             'compact_sidebar' => 'boolean',
         ];
@@ -34,7 +38,7 @@ class ThemeSetting extends Model
     }
 
     /**
-     * @param  array{accent_color:string, show_left_sidebar:bool, compact_sidebar:bool}  $data
+     * @param  array<string, mixed>  $data
      */
     public static function store(array $data): self
     {
@@ -45,4 +49,3 @@ class ThemeSetting extends Model
         return $settings;
     }
 }
-

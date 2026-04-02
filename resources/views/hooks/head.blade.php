@@ -2,12 +2,28 @@
 
 <style>
     :root {
-        --rio-accent: {{ $theme['accent_color'] }};
-        --rio-sidebar-from: {{ $theme['sidebar_from'] }};
-        --rio-sidebar-to: {{ $theme['sidebar_to'] }};
-        --rio-card-radius: {{ $theme['card_radius'] }};
-        --rio-shadow-enabled: {{ $theme['soft_shadows'] ? '1' : '0' }};
+        @foreach (($theme['css_variables'] ?? []) as $variable => $value)
+            {{ $variable }}: {{ $value }};
+        @endforeach
     }
+
+    @if (($theme['a11y']['enforce_focus_ring'] ?? false) === true)
+        :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+            outline: 2px solid var(--rio-focus-ring);
+            outline-offset: 2px;
+        }
+    @endif
+
+    @if (($theme['a11y']['respect_reduced_motion'] ?? false) === true)
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    @endif
 
     @if (! $theme['show_left_sidebar'])
         .fi-sidebar {
@@ -57,4 +73,47 @@
             padding-right: 1rem;
         }
     @endif
+
+    @if (filled($theme['plugin_css'] ?? ''))
+        {!! $theme['plugin_css'] !!}
+    @endif
 </style>
+
+<script>
+    (function () {
+        const mode = @js($theme['mode'] ?? 'auto');
+        const root = document.documentElement;
+
+        const apply = function (isDark) {
+            root.classList.toggle('dark', isDark);
+            root.setAttribute('data-rio-color-scheme', isDark ? 'dark' : 'light');
+        };
+
+        if (mode === 'dark') {
+            apply(true);
+            root.setAttribute('data-rio-mode', 'dark');
+            return;
+        }
+
+        if (mode === 'light') {
+            apply(false);
+            root.setAttribute('data-rio-mode', 'light');
+            return;
+        }
+
+        root.setAttribute('data-rio-mode', 'auto');
+
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        apply(media.matches);
+
+        if (typeof media.addEventListener === 'function') {
+            media.addEventListener('change', function (event) {
+                apply(event.matches);
+            });
+        } else if (typeof media.addListener === 'function') {
+            media.addListener(function (event) {
+                apply(event.matches);
+            });
+        }
+    })();
+</script>
