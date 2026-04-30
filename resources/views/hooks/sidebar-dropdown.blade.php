@@ -1,5 +1,6 @@
 @if (! $theme['show_left_sidebar'] && filament()->hasNavigation())
     @php
+        $maxItems = max(1, (int) config('filament-benriadh-theme.apps_dropdown.max_items', 15));
         $items = collect(filament()->getNavigation())
             ->flatMap(function ($group): array {
                 $groupItems = [];
@@ -18,7 +19,7 @@
             })
             ->filter(fn ($item): bool => filled($item->getLabel()) && filled($item->getUrl()))
             ->unique(fn ($item): string => (string) $item->getUrl())
-            ->take(15)
+            ->take($maxItems)
             ->values();
     @endphp
 

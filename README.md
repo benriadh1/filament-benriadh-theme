@@ -12,15 +12,17 @@ A reusable Filament v5 theme package built with a token-first architecture, pres
 - Light / Dark / Auto mode handling
 - Zero-config installer command for fast setup
 - Panel-level overrides and optional tenant-level branding resolver
-- Theme Settings page with multilingual support
-- Plugin compatibility adapter layer
+- Theme Settings page with multilingual support (EN, FR, AR, DE, ES, PT)
+- Plugin compatibility adapter layer with a `TranslationManagerAdapter` reference
 - Accessibility guardrails (focus ring, reduced motion, WCAG contrast audit command)
 - Upgrade-safe schema (`schema_version`) + migration command for legacy config
+- CSS injection–safe token pipeline with color and value sanitization
+- Per-request theme resolution cache for zero-overhead render hooks
 
 ## Requirements
 
 - PHP `^8.2`
-- Laravel `^11.0 || ^12.0`
+- Laravel `^11.0 || ^12.0 || ^13.0`
 - Filament `^5.0`
 
 ## Zero-Config Install
@@ -86,6 +88,9 @@ Core keys:
 - `presets`
 - `tokens`
 - `layout`
+- `breadcrumbs`
+- `branding`
+- `apps_dropdown`
 - `panel_overrides`
 - `tenant`
 - `extensions`
@@ -93,6 +98,37 @@ Core keys:
 - `show_theme_settings_page`
 
 Legacy keys are still supported and mapped into v1 schema for backward compatibility.
+
+### Apps Dropdown
+
+Controls the navigation grid shown in the topbar when the sidebar is hidden:
+
+```php
+'apps_dropdown' => [
+    'max_items' => 15, // Maximum navigation items shown in the grid
+],
+```
+
+## Localization
+
+The Theme Settings page is translated into 6 languages out of the box:
+
+| Code | Language   |
+|------|------------|
+| `en` | English    |
+| `fr` | French     |
+| `ar` | Arabic (RTL) |
+| `de` | German     |
+| `es` | Spanish    |
+| `pt` | Portuguese |
+
+Publish the language files to customize or add new locales:
+
+```bash
+php artisan vendor:publish --tag="filament-benriadh-theme-lang"
+```
+
+Files are placed under `lang/vendor/filament-benriadh-theme/{locale}/messages.php`.
 
 ## Panel + Tenancy Support
 
@@ -108,6 +144,22 @@ Implement these contracts to extend without forking:
 - `Benriadh1\FilamentBenriadhTheme\Contracts\ThemeTokenTransformer`
 - `Benriadh1\FilamentBenriadhTheme\Contracts\PluginThemeAdapter`
 - `Benriadh1\FilamentBenriadhTheme\Contracts\TenantThemeResolver`
+
+### Plugin Adapter Example
+
+The package ships with `TranslationManagerAdapter` as a reference implementation. It bridges the optional `benriadh1/filament-translation-manager` package by mapping its CSS variables to theme tokens. To activate it (or any custom adapter), register it in your config:
+
+```php
+'extensions' => [
+    'plugin_adapters' => [
+        \Benriadh1\FilamentBenriadhTheme\Adapters\TranslationManagerAdapter::class,
+        // or your own adapter:
+        App\Theme\MyPluginAdapter::class,
+    ],
+],
+```
+
+The adapter is automatically skipped when the target plugin is not installed.
 
 ## Commands
 
@@ -128,6 +180,16 @@ When enabled, the package registers:
 
 Values are stored in `filament_theme_settings` and merged with config + runtime overrides.
 
+## Testing
+
+```bash
+composer install
+composer test        # runs Pest
+composer lint        # runs Laravel Pint
+```
+
+Test coverage includes CSS injection sanitization, color token validation, theme mode normalization, `ThemeSetting::store()` idempotency, and WCAG contrast ratio math.
+
 ## Roadmap
 
 ### v1 (current)
@@ -136,7 +198,7 @@ Values are stored in `filament_theme_settings` and merged with config + runtime 
 - Presets + mode handling
 - Panel/tenant/extensibility hooks
 - Install/migrate/preset/a11y command set
-- Multilingual Theme Settings page
+- Multilingual Theme Settings page (EN, FR, AR, DE, ES, PT)
 
 ### v2
 

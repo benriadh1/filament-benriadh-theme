@@ -113,10 +113,17 @@ class MigrateThemeSchemaCommand extends Command
 
     protected function exportArray(array $array): string
     {
-        return preg_replace(
-            ['/array \(/', '/\)(,?)$/m'],
-            ['[', ']$1'],
-            var_export($array, true),
-        ) ?? var_export($array, true);
+        $exported = var_export($array, true);
+
+        // Convert array() syntax to short [] syntax
+        $exported = (string) preg_replace('/array \(/', '[', $exported);
+        $exported = (string) preg_replace('/\)(,?)$/m', ']$1', $exported);
+
+        // Fix PHP var_export uppercase keywords to lowercase
+        $exported = (string) preg_replace('/\bNULL\b/', 'null', $exported);
+        $exported = (string) preg_replace('/\bTRUE\b/', 'true', $exported);
+        $exported = (string) preg_replace('/\bFALSE\b/', 'false', $exported);
+
+        return $exported;
     }
 }

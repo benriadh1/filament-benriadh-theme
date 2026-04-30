@@ -35,8 +35,12 @@
 }
 
 .fi-topbar {
-    background: #0f1320;
-    border-bottom: 1px solid color-mix(in srgb, white 10%, transparent);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--rio-surface-alt) 88%, black 12%),
+        var(--rio-surface-alt)
+    );
+    border-bottom: 1px solid color-mix(in srgb, var(--rio-border) 72%, transparent);
     backdrop-filter: blur(6px);
 }
 

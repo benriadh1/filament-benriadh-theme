@@ -7,6 +7,9 @@ use Filament\Panel;
 use Filament\View\PanelsRenderHook;
 use Benriadh1\FilamentBenriadhTheme\Pages\ThemeSettingsPage;
 use Benriadh1\FilamentBenriadhTheme\Support\ThemeConfigResolver;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 class FilamentBenriadhThemePlugin implements Plugin
 {
@@ -40,11 +43,71 @@ class FilamentBenriadhThemePlugin implements Plugin
             ]);
         }
 
+        $defaultBrandName = $panel->getBrandName();
+        $defaultBrandLogo = $panel->getBrandLogo();
+        $defaultDarkBrandLogo = $panel->getDarkModeBrandLogo();
+        $defaultBrandLogoHeight = $panel->getBrandLogoHeight();
+
+        $panel->brandName(function () use ($panel, $defaultBrandName) {
+            $theme = $this->resolveThemeConfig($panel);
+            $name = trim((string) ($theme['app_name'] ?? ''));
+
+            return $name !== '' ? $name : $defaultBrandName;
+        });
+
+        $panel->brandLogo(function () use ($panel, $defaultBrandLogo) {
+            $theme = $this->resolveThemeConfig($panel);
+            $logo = $this->resolveLogoSource($theme['logo_url'] ?? null);
+
+            return $logo ?? $defaultBrandLogo;
+        });
+
+        $panel->darkModeBrandLogo(function () use ($panel, $defaultDarkBrandLogo, $defaultBrandLogo) {
+            $theme = $this->resolveThemeConfig($panel);
+            $darkLogo = $this->resolveLogoSource($theme['dark_logo_url'] ?? null);
+            $lightLogo = $this->resolveLogoSource($theme['logo_url'] ?? null);
+
+            return $darkLogo ?? $defaultDarkBrandLogo ?? $lightLogo ?? $defaultBrandLogo;
+        });
+
+        $panel->brandLogoHeight(function () use ($panel, $defaultBrandLogoHeight): string {
+            $theme = $this->resolveThemeConfig($panel);
+            $height = $theme['logo_height'] ?? null;
+
+            if ($height === null) {
+                return $defaultBrandLogoHeight ?? '2.5rem';
+            }
+
+            $height = (int) $height;
+
+            if ($height < 24) {
+                $height = 24;
+            } elseif ($height > 96) {
+                $height = 96;
+            }
+
+            return "{$height}px";
+        });
+
+        $panel->topNavigation(function () use ($panel): bool {
+            $theme = $this->resolveThemeConfig($panel);
+
+            return (($theme['navigation_layout'] ?? 'sidebar') === 'topbar');
+        });
+
         $panel->renderHook(
             PanelsRenderHook::TOPBAR_START,
-            fn (): string => view('filament-benriadh-theme::hooks.sidebar-dropdown', [
-                'theme' => $this->resolveThemeConfig($panel),
-            ])->render(),
+            function () use ($panel): string {
+                $theme = $this->resolveThemeConfig($panel);
+
+                if (($theme['show_apps_dropdown'] ?? true) === false) {
+                    return '';
+                }
+
+                return view('filament-benriadh-theme::hooks.sidebar-dropdown', [
+                    'theme' => $theme,
+                ])->render();
+            },
         );
 
         $panel->renderHook(
@@ -180,8 +243,37 @@ class FilamentBenriadhThemePlugin implements Plugin
 
     protected function shouldRegisterThemeSettingsPage(): bool
     {
-        $config = config('filament-benriadh-theme', config('filament-aureus-theme', []));
+        $config = config('filament-benriadh-theme', []);
 
         return (bool) ($config['show_theme_settings_page'] ?? true);
+    }
+
+    protected function resolveLogoSource(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (Str::startsWith($value, ['http://', 'https://', 'data:', '/'])) {
+            return $value;
+        }
+
+        if (Str::startsWith($value, 'storage/')) {
+            return '/'.$value;
+        }
+
+        $disk = (string) config('filament-benriadh-theme.branding.logo_disk', 'public');
+
+        try {
+            return Storage::disk($disk)->url($value);
+        } catch (Throwable) {
+            return null;
+        }
     }
 }

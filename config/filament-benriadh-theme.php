@@ -145,6 +145,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Breadcrumbs
+    |--------------------------------------------------------------------------
+    */
+    'breadcrumbs' => [
+        'enabled' => true,
+        'show_home' => true,
+        'show_icons' => false,
+        'max_items' => 4,
+        'collapse' => true,
+        'style' => 'pill', // pill | minimal
+        'mobile_mode' => 'compact', // compact | full-scroll
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Branding Overrides
+    |--------------------------------------------------------------------------
+    */
+    'branding' => [
+        'app_name' => null,
+        'logo_url' => null,
+        'dark_logo_url' => null,
+        'logo_height' => 40,
+        'logo_disk' => 'public',
+        'logo_directory' => 'filament-theme/logos',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Panel Overrides
     |--------------------------------------------------------------------------
     |
@@ -192,6 +221,18 @@ return [
         'plugin_adapters' => [
             Benriadh1\FilamentBenriadhTheme\Adapters\TranslationManagerAdapter::class,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Apps Dropdown
+    |--------------------------------------------------------------------------
+    |
+    | Controls the apps grid shown in the topbar when the sidebar is hidden.
+    |
+    */
+    'apps_dropdown' => [
+        'max_items' => 15,
     ],
 
     /*
