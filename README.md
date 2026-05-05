@@ -5,6 +5,8 @@
 
 A reusable Filament v5 theme package built with a token-first architecture, preset system, accessibility guardrails, and extension hooks for long-term upgrade safety.
 
+Release version: `1.0.0`
+
 ## Highlights
 
 - Token-first design with semantic tokens (`surface`, `text`, `primary`, `danger`, etc.)
