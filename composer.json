@@ -1,5 +1,6 @@
 {
     "name": "benriadh1/filament-benriadh-theme",
+    "version": "1.0.0",
     "description": "A Filament v5 ERP-inspired theme package.",
     "type": "library",
     "license": "MIT",
